@@ -16,27 +16,7 @@ env:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  setup-secrets:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Set var
-        run: echo "MY_SECRET=${{ secrets.MYSECRET }}" >> $GITHUB_ENV
-      - name: Get var
-        environment: deploy
-        run: echo "MY_SECRET=$MY_SECRET"
-
   build:
-    environment: deploy
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      - name: Log it
-        run: echo "  MY_SECRET=${{ secrets.MYSECRET }}"
-  build2:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -44,15 +24,35 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
+      - name: Cache Image
+        id: cache-tar
+        uses: actions/cache@v2
+        with:
+          path: out.tar
+          key: mytar
       # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-      - name: Get var
-        run: echo "MY_SECRET=$MY_SECRET"
+      - name: Build Image
+        run: docker build -t mycosa:1.0 .
+      - name: Save
+        run: docker save mycosa:1.0 > out.tar
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+  restore:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Cache Image
+        id: cache-tar
+        uses: actions/cache@v2
+        with:
+          path: out.tar
+          key: mytar
+      # Runs a single command using the runners shell
+      - name: List
+        run: ls
+      - name: Unpack
+        run: tar -tf ./out.tar
+      - name: Load
+        run: docker load  < ./out.tar
