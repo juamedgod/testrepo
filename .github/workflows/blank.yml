@@ -20,11 +20,11 @@ jobs:
   setup-secrets:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    environment: ${{ env.ENVIRONMENT }}
     steps:
       - name: Set var
         run: echo "MY_SECRET=${{ secrets.MYSECRET }}" >> $GITHUB_ENV
       - name: Get var
+        environment: deploy
         run: echo "MY_SECRET=$MY_SECRET"
 
   build:
