@@ -9,9 +9,10 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+env:
+  ENVIRONMENT: deploy
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -19,7 +20,7 @@ jobs:
   setup-secrets:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    environment: 'deploy'
+    environment: ${{ env.ENVIRONMENT }}
     steps:
       - name: Set var
         run: echo "MY_SECRET=${{ secrets.MYSECRET }}" >> $GITHUB_ENV
