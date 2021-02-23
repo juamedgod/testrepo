@@ -16,7 +16,27 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
+  setup-secrets:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: 'deploy'
+    steps:
+      - name: Set var
+        run: echo "MY_SECRET=${{ secrets.MYSECRET }}" >> $GITHUB_ENV
+      - name: Get var
+        run: echo "MY_SECRET=$MY_SECRET"
+
   build:
+    if: github.ref == 'refs/heads/main'
+    environment: ${{ github.ref }}
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Log it
+        run: echo "MY_SECRET=${{ secrets.MYSECRET }}"
+  build2:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -28,6 +48,8 @@ jobs:
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: echo Hello, world!
+      - name: Get var
+        run: echo "MY_SECRET=$MY_SECRET"
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
